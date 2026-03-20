@@ -2,7 +2,13 @@
 // MapContainer - Container do mapa(caixa); TileLayer - Imagens das ruas para compor o mapa
 // Marker - É o pino azul que aparece no mapa; Popup - É o texto que aparece no ao clicar no ponto azul
 // Polyline - Desenha as linhas no mapa;
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet";
 // useEffect - Um gatilho, se ocorrer X, faça Y; useState - guarda o estado de uma variável
 import { useEffect, useState } from "react";
 // Garante o arquivo CSS do mapa, sem ele o mapa fica feio e quebrado
@@ -10,9 +16,12 @@ import "leaflet/dist/leaflet.css";
 
 // ---- COMPONENTE DAS CURVAS ----
 // Missão dessa função é receber uma pilha de coordenadas, requisitar ao servidor OSRM como ir de um ponto ao outro pelas ruas certas e desenhar a linha
-const RotaComCurvas = ({ pontos }: { pontos: [number, number][] }) => { // Recebe as coordenadas das paradadas do caminhão
-  // Memória que vai guardar os centenas de pontos que formas as curvas das ruas 
-  const [coordenadasRota, setCoordenadasRota] = useState<[number, number][]>([]);
+const RotaComCurvas = ({ pontos }: { pontos: [number, number][] }) => {
+  // Recebe as coordenadas das paradadas do caminhão
+  // Memória que vai guardar os centenas de pontos que formas as curvas das ruas
+  const [coordenadasRota, setCoordenadasRota] = useState<[number, number][]>(
+    [],
+  );
 
   // Esse trecho é acionado toda vez que os pontos das rotas mudam;
   useEffect(() => {
@@ -39,10 +48,9 @@ const RotaComCurvas = ({ pontos }: { pontos: [number, number][] }) => { // Receb
           const coordenadasGeoJson = dados.routes[0].geometry.coordinates;
 
           // Aqui nós invertemos novamente as coordenadas para o nosso padrão convencional
-          const coordenadasLeaflet = coordenadasGeoJson.map((coord: [number, number]) => [
-            coord[1],
-            coord[0],
-          ]);
+          const coordenadasLeaflet = coordenadasGeoJson.map(
+            (coord: [number, number]) => [coord[1], coord[0]],
+          );
           setCoordenadasRota(coordenadasLeaflet);
         }
       })
@@ -57,10 +65,17 @@ const RotaComCurvas = ({ pontos }: { pontos: [number, number][] }) => { // Receb
 
   // Se houver rotas, ele desenha conforme o estilo pré-definido. Caso não, ele não retorna nada 'return null'
   if (coordenadasRota.length === 0) return null;
-  return <Polyline positions={coordenadasRota} color="blue" weight={6} opacity={0.8} />;
+  return (
+    <Polyline
+      positions={coordenadasRota}
+      color="blue"
+      weight={6}
+      opacity={0.8}
+    />
+  );
 };
 
-// ---- COMPONENTE PRINCIPAL, O DO MAPA ---- 
+// ---- COMPONENTE PRINCIPAL, O DO MAPA ----
 const Mapa = () => {
   // Criamos uma lista de texto para guardar o nome das ruas, há dois espaços vazios para a rua inicial e a rua final
   const [ruas, setRuas] = useState<string[]>(["", ""]);
@@ -69,7 +84,7 @@ const Mapa = () => {
 
   // Pega a lista de ruas e adiciona mais um espaço vazio ao final, para mais uma rua
   const adicionarCampoRua = () => setRuas([...ruas, ""]);
-  
+
   // Vai no campo exato que a pessoa está modificando e atualiza na lista de ruas na ordem correta
   const atualizarTextoRua = (index: number, valor: string) => {
     const novasRuas = [...ruas];
@@ -84,14 +99,16 @@ const Mapa = () => {
   };
 
   // Essa função recebe o nome da rua
-  const buscarCoordenadas = async (endereco: string): Promise<[number, number] | null> => {
+  const buscarCoordenadas = async (
+    endereco: string,
+  ): Promise<[number, number] | null> => {
     try {
       // Concatenando a cidade para a busca ser precisa. No nosso caso, Belém
       const busca = `${endereco}, Belém, Pará`;
 
       // Montamos a URL para a API que vai retornar as coord da rua desejada
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(busca)}`;
-      
+
       // Aciona a API para obter os pontos certos e depois transforma-os em JSON
       const resposta = await fetch(url);
       const dados = await resposta.json();
@@ -110,8 +127,8 @@ const Mapa = () => {
   // Função disparada ao clicar no botão de 'Desenhar Rota'
   const handleCriarRota = async () => {
     // Filtra para descartar os campos em branco deixados pelo usuário
-    const ruasPreenchidas = ruas.filter(rua => rua.trim() !== "");
-    
+    const ruasPreenchidas = ruas.filter((rua) => rua.trim() !== "");
+
     // Caso tenha menos de 2 ruas, ele dispara uma mensagem para adicionar mais
     if (ruasPreenchidas.length < 2) {
       alert("Por favor, preencha pelo menos o início e o fim da rota.");
@@ -119,49 +136,66 @@ const Mapa = () => {
     }
 
     // Busca as coordenadas de todas as ruas digitadas ao mesmo tempo para poupar tempo
-    const promessasCoordenadas = ruasPreenchidas.map(rua => buscarCoordenadas(rua));
+    const promessasCoordenadas = ruasPreenchidas.map((rua) =>
+      buscarCoordenadas(rua),
+    );
     const resultados = await Promise.all(promessasCoordenadas);
 
     // Verifica se todas as ruas buscadas foram devolvidas
-    const coordenadasValidas = resultados.filter(coord => coord !== null) as [number, number][];
+    const coordenadasValidas = resultados.filter((coord) => coord !== null) as [
+      number,
+      number,
+    ][];
 
     // Se encontrou todas as ruas no mapa, desenha a rota
     if (coordenadasValidas.length === ruasPreenchidas.length) {
       setPontosDaRota(coordenadasValidas);
     } else {
-      alert("Atenção: Algumas ruas não foram encontradas. Tente escrever o nome mais completo.");
+      alert(
+        "Atenção: Algumas ruas não foram encontradas. Tente escrever o nome mais completo.",
+      );
     }
   };
 
   // ---- PARTE VISUAL ----
   return (
     <div className="flex flex-col gap-3.75">
-      
       {/* --- PAINEL DE CONTROLE DAS COOPERATIVAS --- */}
       <div className="p-3.75 bg-[#f3f4f6] rounded-lg text-black">
-
         <section className=" flex justify-between mb-5">
-          <h3 className=" text-[#0a3d62d8] font-bold text-[20px]">Definir rotas de coleta</h3>
-                   
-          <button onClick={adicionarCampoRua} className="bg-[#0a3d62] p-1 pr-5 pl-5 text-[15px] rounded-[5px] font-bold text-[#ffffff] cursor-pointer">
+          <h3 className=" text-[#0a3d62d8] font-bold text-[20px]">
+            Definir rotas de coleta
+          </h3>
+
+          <button
+            onClick={adicionarCampoRua}
+            className="bg-[#0a3d62] p-1 pr-5 pl-5 text-[15px] rounded-[5px] font-bold text-[#ffffff] cursor-pointer"
+          >
             + Adicionar Rua Intermediária
           </button>
         </section>
 
         {ruas.map((rua, index) => (
-          <div key={index} style={{ marginBottom: "10px", display: "flex", alignItems: "center" }}>
-            <span style={{ width: "80px", fontWeight: "bold" }}>
-              {index === 0 ? "Início:" : index === ruas.length - 1 ? "Fim:" : `Rua ${index + 1}:`}
+          <div key={index} className="mb-2.5 flex items-center">
+            <span className="w-20 font-bold">
+              {index === 0
+                ? "Início:"
+                : index === ruas.length - 1
+                  ? "Fim:"
+                  : `Rua ${index + 1}:`}
             </span>
-            <input 
-              type="text" 
-              placeholder="Ex: Avenida Almirante Barroso" 
+            <input
+              type="text"
+              placeholder="Ex: Avenida Almirante Barroso"
               value={rua}
               onChange={(e) => atualizarTextoRua(index, e.target.value)}
-              style={{ padding: "8px", width: "300px", marginRight: "10px" }}
+              className="p-2 w-75 mr-2.75"
             />
             {ruas.length > 2 && (
-              <button onClick={() => removerCampoRua(index)} style={{ padding: "8px", cursor: "pointer", backgroundColor: "#ef4444", color: "white", border: "none", borderRadius: "4px" }}>
+              <button
+                onClick={() => removerCampoRua(index)}
+                className="p-2 cursor-pointer bg-[#ef4444] text-white border-none rounded-sm"
+              >
                 X
               </button>
             )}
@@ -169,19 +203,22 @@ const Mapa = () => {
         ))}
 
         <div style={{ marginTop: "15px" }}>
-          <button onClick={handleCriarRota} style={{ padding: "10px 15px", cursor: "pointer", backgroundColor: "#39B241", color: "white", border: "none", borderRadius: "4px", fontWeight: "bold" }}>
+          <button
+            onClick={handleCriarRota}
+            className="pt-2.5 pb-2.5 pr-3.75 pl-3.75 cursor-pointer bg-[#39B241] text-white border-none rounded-sm font-bold"
+          >
             Desenhar Rota no Mapa
           </button>
         </div>
       </div>
 
       {/* --- MAPA --- */}
-      <div style={{ height: "500px", width: "100%"}}>
+      <div className="h-125 w-full">
         <MapContainer
           center={[-1.418972, -48.458581]} // Deixei centrado na sua coordenada original
           zoom={12}
           scrollWheelZoom={true}
-          style={{ height: "100%", width: "100%"}}
+          className="h-full w-full"
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -192,7 +229,7 @@ const Mapa = () => {
           {pontosDaRota.length > 0 && (
             <>
               <RotaComCurvas pontos={pontosDaRota} />
-              
+
               {/* Pino Inicial */}
               <Marker position={pontosDaRota[0]}>
                 <Popup>Início da Rota</Popup>
