@@ -1,9 +1,9 @@
-import Mapa from "./components/Mapa";
+import CadastroRotas from "./pages/CadastroRotas";
 
 function App() {
 
   return (
-    <Mapa/>
+      <CadastroRotas/>
   );
 }
 

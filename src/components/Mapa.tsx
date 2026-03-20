@@ -135,12 +135,19 @@ const Mapa = () => {
 
   // ---- PARTE VISUAL ----
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+    <div className="flex flex-col gap-3.75">
       
       {/* --- PAINEL DE CONTROLE DAS COOPERATIVAS --- */}
-      <div style={{ padding: "15px", backgroundColor: "#f3f4f6", borderRadius: "8px", color: "black" }}>
-        <h3 style={{ marginTop: 0, marginBottom: "15px" }}>Montar Rota de Coleta</h3>
-        
+      <div className="p-3.75 bg-[#f3f4f6] rounded-lg text-black">
+
+        <section className=" flex justify-between mb-5">
+          <h3 className=" text-[#0a3d62d8] font-bold text-[20px]">Definir rotas de coleta</h3>
+                   
+          <button onClick={adicionarCampoRua} className="bg-[#0a3d62] p-1 pr-5 pl-5 text-[15px] rounded-[5px] font-bold text-[#ffffff] cursor-pointer">
+            + Adicionar Rua Intermediária
+          </button>
+        </section>
+
         {ruas.map((rua, index) => (
           <div key={index} style={{ marginBottom: "10px", display: "flex", alignItems: "center" }}>
             <span style={{ width: "80px", fontWeight: "bold" }}>
@@ -162,22 +169,19 @@ const Mapa = () => {
         ))}
 
         <div style={{ marginTop: "15px" }}>
-          <button onClick={adicionarCampoRua} style={{ marginRight: "10px", padding: "10px 15px", cursor: "pointer", backgroundColor: "#3b82f6", color: "white", border: "none", borderRadius: "4px" }}>
-            + Adicionar Rua Intermediária
-          </button>
-          <button onClick={handleCriarRota} style={{ padding: "10px 15px", cursor: "pointer", backgroundColor: "#10b981", color: "white", border: "none", borderRadius: "4px", fontWeight: "bold" }}>
+          <button onClick={handleCriarRota} style={{ padding: "10px 15px", cursor: "pointer", backgroundColor: "#39B241", color: "white", border: "none", borderRadius: "4px", fontWeight: "bold" }}>
             Desenhar Rota no Mapa
           </button>
         </div>
       </div>
 
       {/* --- MAPA --- */}
-      <div style={{ height: "800px", width: "100%" }}>
+      <div style={{ height: "500px", width: "100%"}}>
         <MapContainer
           center={[-1.418972, -48.458581]} // Deixei centrado na sua coordenada original
-          zoom={14}
+          zoom={12}
           scrollWheelZoom={true}
-          style={{ height: "100%", width: "100%" }}
+          style={{ height: "100%", width: "100%"}}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
